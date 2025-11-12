@@ -1,0 +1,313 @@
+/* 전역 설정 */
+:root {
+    --primary-green: #1ed760;
+    --light-green: #4dffb0;
+    --dark-green-bg: #0f251a;
+    --card-bg: #1c3a2b;
+    --dark-bg: #0a1a0a;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --progress-bg: #334a40;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    background-color: #121212;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: var(--text-primary);
+}
+
+.app-container {
+    width: 100%;
+    max-width: 400px;
+    height: 844px;
+    background-color: var(--dark-green-bg);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 화면 전환 로직 */
+.screen {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+.screen.active {
+    display: flex;
+}
+
+.screen-content {
+    padding: 16px;
+    overflow-y: auto;
+    flex-grow: 1;
+    padding-bottom: 80px; 
+}
+.screen-content.text-center {
+    text-align: center;
+}
+
+/* 헤더 */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    padding-top: 30px;
+}
+.header-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+/* (수정) SVG 아이콘 버튼 스타일 */
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 40px;  /* 버튼 크기 */
+    height: 40px; /* 버튼 크기 */
+    padding: 8px; /* 아이콘 주변 여백 */
+    box-sizing: border-box; /* 패딩을 크기에 포함 */
+}
+/* (추가) 아이콘 버튼 내부 SVG 스타일 */
+.icon-btn svg {
+    width: 100%; /* 패딩 제외 영역(24px) 채움 */
+    height: 100%;
+    fill: var(--text-primary); /* 아이콘 색상 */
+}
+
+/* 공용 컴포넌트 */
+.btn {
+    border: none;
+    border-radius: 50px;
+    padding: 14px 20px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+}
+.btn-primary {
+    background-color: var(--primary-green);
+    color: var(--dark-bg);
+}
+.label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 8px;
+}
+.progress-bar-container {
+    width: 100%;
+    background-color: var(--progress-bg);
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+}
+.progress-bar-fill {
+    background-color: var(--primary-green);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+/* 1. 홈 화면 (Home) */
+.progress-section {
+    margin-bottom: 24px;
+}
+.daily-scenario-card {
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+.card-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+.card-content {
+    padding: 16px;
+}
+.card-content h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+.card-content p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 16px;
+}
+.stats-title {
+    margin-left: 4px;
+}
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.stat-box {
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+}
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    display: block;
+    margin-top: 4px;
+}
+
+/* 2. 시나리오 화면 (Scenario) */
+.scenario-image {
+    width: 100%;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+#scenario-screen h2 {
+    margin-bottom: 8px;
+}
+#scenario-screen p {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 32px;
+}
+.btn-record {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 80%;
+    max-width: 300px;
+    margin: 40px auto 0 auto;
+    padding: 16px;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(30, 215, 96, 0.4);
+}
+.btn-icon {
+    width: 24px;
+    height: 24px;
+    fill: var(--dark-bg);
+}
+
+/* 3. 로딩 화면 (Loading) */
+#loading-screen {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+.spinner {
+    border: 4px solid var(--progress-bg);
+    border-top: 4px solid var(--primary-green);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px auto;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 4. 피드백 화면 (Feedback) */
+#feedback-screen p {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+.score-box {
+    border-radius: 16px;
+    background-color: var(--card-bg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto 30px;
+    padding: 24px 40px;
+}
+.score-value {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: var(--primary-green);
+    line-height: 1;
+}
+.score-box .label {
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+}
+.feedback-details {
+    text-align: left;
+    margin-bottom: 24px;
+}
+.feedback-category {
+    margin-bottom: 20px;
+}
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+.feedback-category .label {
+    margin-top: 6px;
+    margin-bottom: 0;
+    font-size: 0.75rem;
+}
+
+/* 하단 네비게이션 */
+.bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background-color: var(--dark-bg);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid var(--card-bg);
+    box-sizing: border-box;
+}
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+.nav-item.active {
+    color: var(--primary-green);
+}
+.nav-icon {
+    width: 26px;
+    height: 26px;
+    margin-bottom: 2px;
+}
+.nav-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: var(--text-secondary);
+    transition: fill 0.2s ease;
+}
+.nav-item.active .nav-icon svg {
+    fill: var(--primary-green);
+}
+.nav-label {
+    font-size: 0.7rem;
+}
