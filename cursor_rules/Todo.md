@@ -4,12 +4,9 @@
 
 ## 🚀 Phase 1: 프로젝트 준비 및 기반 설정 (Project Setup & Infrastructure)
 
--   [ ] **Project Management**
-    -   [ ] Git Repository 생성 및 브랜치 전략 수립 (e.g., Git-flow)
-    -   [ ] 칸반 보드(Jira, Trello, GitHub Projects) 설정 및 Epic/User Story 정리
 -   [ ] **Infrastructure & Architecture**
     -   [ ] Database 스키마 설계 (User, Scenario, UserProgress 등) - ~~Ranking 제외~~
-    -   [ ] Android 프로젝트 초기 설정 (Kotlin, Jetpack Compose, MVVM 구조)
+    -   [x] Android 프로젝트 초기 설정 (Kotlin, Jetpack Compose, MVVM 구조)
     -   [ ] 외부 API 키 발급 및 보안 관리 방안 수립 (Google Cloud, OpenAI 등)
     -   [ ] CI/CD 파이프라인 기본 구성 (GitHub Actions 등)
 
@@ -34,17 +31,17 @@
 ## 📱 Phase 3: 클라이언트(안드로이드) 개발 (Android Development)
 
 -   [ ] **UI/UX - 공통**
-    -   [ ] 앱 전체 디자인 시스템(Color, Typography, Component) 정의
-    -   [ ] 메인 화면, 프로필 화면 등 기본 Navigation Flow 구현 (~~랭킹 화면 제외~~)
+    -   [x] 앱 전체 디자인 시스템(Color, Typography, Component) 정의
+    -   [x] 메인 화면, 프로필 화면 등 기본 Navigation Flow 구현 (~~랭킹 화면 제외~~)
     -   [ ] Retrofit, Coroutines을 사용한 네트워크 모듈 구현
     -   [ ] Room을 사용한 로컬 DB 모듈 구현
 -   [ ] **UI/UX - 핵심 기능 (시나리오)**
-    -   [ ] 시나리오 제시 화면 구현 (이미지, 텍스트, 미션 표시)
+    -   [x] 시나리오 제시 화면 구현 (이미지, 텍스트, 미션 표시)
     -   [ ] 캐릭터 음성 자동 재생 기능 구현
     -   [ ] 마이크 권한 요청 및 음성 녹음 기능 구현
     -   [ ] 녹음된 음성 파일을 서버로 전송하는 로직 구현
 -   [ ] **UI/UX - 결과 및 피드백**
-    -   [ ] 평가 결과(점수, 상세 피드백, 추천 표현) 표시 화면 구현
+    -   [x] 평가 결과(점수, 상세 피드백, 추천 표현) 표시 화면 구현
     -   [ ] AI 응답 음성 재생 기능 구현
     -   [ ] 경험치 획득 및 레벨업 시각적 효과(애니메이션) 구현
 -   [ ] **UI/UX - Gamification**
