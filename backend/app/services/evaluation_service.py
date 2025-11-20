@@ -60,7 +60,23 @@ class EvaluationService:
             )
             response = await model.generate_content_async(prompt, generation_config=generation_config)
             
+            # 응답 검증
+            if not response.candidates or len(response.candidates) == 0:
+                print("Warning: No candidates in Gemini response")
+                return self._create_mock_evaluation(user_text)
+            
+            candidate = response.candidates[0]
+            if candidate.finish_reason != 1:  # 1 = STOP (정상 완료)
+                print(f"Warning: Gemini finish_reason={candidate.finish_reason} (1=STOP, 2=SAFETY, 3=MAX_TOKENS, etc.)")
+                if candidate.finish_reason == 2:  # SAFETY 필터
+                    print("Gemini API blocked by safety filter, using mock evaluation")
+                return self._create_mock_evaluation(user_text)
+            
             # 응답 파싱
+            if not hasattr(response, 'text') or not response.text:
+                print("Warning: No text in Gemini response")
+                return self._create_mock_evaluation(user_text)
+            
             response_text = response.text.strip()
             
             # JSON 추출 (마크다운 코드 블록 제거)
@@ -189,6 +205,20 @@ class EvaluationService:
                 max_output_tokens=100,
             )
             response = await model.generate_content_async(prompt, generation_config=generation_config)
+            
+            # 응답 검증
+            if not response.candidates or len(response.candidates) == 0:
+                print("Warning: No candidates in Gemini AI response")
+                return "わかりました。詳しくお話を聞かせてください。"
+            
+            candidate = response.candidates[0]
+            if candidate.finish_reason != 1:  # 1 = STOP (정상 완료)
+                print(f"Warning: Gemini AI finish_reason={candidate.finish_reason}")
+                return "わかりました。詳しくお話を聞かせてください。"
+            
+            if not hasattr(response, 'text') or not response.text:
+                print("Warning: No text in Gemini AI response")
+                return "わかりました。詳しくお話を聞かせてください。"
             
             return response.text.strip()
             

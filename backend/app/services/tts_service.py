@@ -16,18 +16,48 @@ class TTSService:
         """Initialize TTS service"""
         self.credentials_path = settings.google_application_credentials
         self.project_id = settings.google_cloud_project_id
-        self.upload_dir = Path(settings.upload_dir)
-        self.upload_dir.mkdir(exist_ok=True)
+        # 절대 경로로 설정 (backend/uploads/audio)
+        base_dir = Path(__file__).parent.parent.parent
+        self.upload_dir = base_dir / "uploads" / "audio"
+        self.upload_dir.mkdir(parents=True, exist_ok=True)
+        print(f"TTS upload_dir initialized: {self.upload_dir.absolute()}")
+        
+        # Google Cloud TTS 클라이언트 초기화 (지연 로딩)
+        self.client = None
+        self.texttospeech = None
+        self._initialized = False
+    
+    def _ensure_client_initialized(self):
+        """Ensure Google Cloud TTS client is initialized"""
+        if self._initialized:
+            return
+        
+        self._initialized = True
         
         # Google Cloud TTS 클라이언트 초기화
-        self.client = None
+        print(f"TTS Service init: credentials_path={self.credentials_path}")
         if self.credentials_path and os.path.exists(self.credentials_path):
             try:
+                os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = self.credentials_path
+                print(f"Setting GOOGLE_APPLICATION_CREDENTIALS for TTS: {self.credentials_path}")
                 from google.cloud import texttospeech
                 self.client = texttospeech.TextToSpeechAsyncClient()
                 self.texttospeech = texttospeech
+                print("Google Cloud TTS client initialized successfully")
             except ImportError:
                 print("Warning: google-cloud-texttospeech not installed")
+                self.client = None
+                self.texttospeech = None
+            except Exception as e:
+                print(f"Warning: Google Cloud TTS client initialization failed: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                self.client = None
+                self.texttospeech = None
+        else:
+            print(f"Warning: TTS credentials file not found at {self.credentials_path}")
+            self.client = None
+            self.texttospeech = None
     
     async def synthesize_speech(
         self,
@@ -44,8 +74,12 @@ class TTSService:
         Returns:
             Optional[str]: 생성된 음성 파일 URL
         """
+        # 클라이언트 초기화 확인
+        self._ensure_client_initialized()
+        
         if not self.client or not self.texttospeech:
             # TTS 서비스가 없으면 None 반환
+            print("Warning: TTS client is None, skipping speech synthesis")
             return None
         
         try:
@@ -80,8 +114,11 @@ class TTSService:
             with open(filepath, "wb") as out:
                 out.write(response.audio_content)
             
-            # URL 반환 (실제 환경에서는 S3 등의 URL을 반환)
-            return f"/uploads/{filename}"
+            print(f"TTS file saved: {filepath}")
+            print(f"TTS file exists: {filepath.exists()}")
+            
+            # URL 반환 (uploads/audio/ 디렉토리에 저장)
+            return f"/uploads/audio/{filename}"
             
         except Exception as e:
             print(f"TTS Error: {str(e)}")

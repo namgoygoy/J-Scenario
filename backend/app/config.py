@@ -1,8 +1,14 @@
 """
 Application configuration
 """
-from pydantic_settings import BaseSettings
+import os
+from pathlib import Path
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
+
+# .env 파일의 절대 경로 찾기
+BASE_DIR = Path(__file__).parent.parent
+ENV_FILE = BASE_DIR / ".env"
 
 
 class Settings(BaseSettings):
@@ -31,9 +37,12 @@ class Settings(BaseSettings):
     upload_dir: str = "./uploads"
     max_audio_size_mb: int = 10
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = SettingsConfigDict(
+        env_file=str(ENV_FILE) if ENV_FILE.exists() else None,
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore"
+    )
 
 
 @lru_cache()

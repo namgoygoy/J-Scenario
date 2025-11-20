@@ -46,7 +46,9 @@ class InteractionService:
         
         try:
             # Step 1: STT - 음성을 텍스트로 변환
-            transcription = await self.stt_service.transcribe_audio(audio_data)
+            print(f"Processing audio: filename={filename}, size={len(audio_data)} bytes")
+            transcription = await self.stt_service.transcribe_audio(audio_data, filename)
+            print(f"Transcription result: {transcription}")
             
             # Step 2: LLM - 평가 및 피드백 생성
             evaluation = await self.evaluation_service.evaluate_response(
