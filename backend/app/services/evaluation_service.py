@@ -6,6 +6,7 @@ import json
 from typing import Optional, Any
 import google.generativeai as genai  # type: ignore
 from app.config import get_settings
+from app.utils.exceptions import ServiceUnavailableError, ServiceExecutionError
 
 settings = get_settings()
 
@@ -59,7 +60,10 @@ class EvaluationService:
             }
         """
         if self.model is None:
-            return self._create_mock_grammar_evaluation()
+            raise ServiceUnavailableError(
+                service_name="Grammar Evaluation",
+                details="Gemini API key is not configured or model initialization failed"
+            )
         
         model = self.model
         
@@ -87,7 +91,10 @@ class EvaluationService:
             
             if not response.candidates or len(response.candidates) == 0:
                 print("Warning: No candidates in Gemini grammar evaluation")
-                return self._create_mock_grammar_evaluation()
+                raise ServiceExecutionError(
+                    service_name="Grammar Evaluation",
+                    details="Gemini API returned no candidates"
+                )
             
             candidate = response.candidates[0]
             print(f"[DEBUG] finish_reason: {candidate.finish_reason} (type: {type(candidate.finish_reason)})")
@@ -99,15 +106,24 @@ class EvaluationService:
                 print(f"[DEBUG] finish_reason name: {finish_reason_name}")
                 if finish_reason_name not in ['STOP', 'MAX_TOKENS']:
                     print(f"Warning: Gemini grammar evaluation finish_reason={finish_reason_name}")
-                    return self._create_mock_grammar_evaluation()
+                    raise ServiceExecutionError(
+                        service_name="Grammar Evaluation",
+                        details=f"Gemini API returned unexpected finish_reason: {finish_reason_name}"
+                    )
             elif candidate.finish_reason not in [1, 2]:  # 1=STOP, 2=MAX_TOKENS
                 print(f"Warning: Gemini grammar evaluation finish_reason={candidate.finish_reason}")
-                return self._create_mock_grammar_evaluation()
+                raise ServiceExecutionError(
+                    service_name="Grammar Evaluation",
+                    details=f"Gemini API returned unexpected finish_reason: {candidate.finish_reason}"
+                )
             
             if not hasattr(response, 'text') or not response.text:
                 print("Warning: No text in Gemini grammar evaluation")
                 print(f"[DEBUG] response attributes: {dir(response)}")
-                return self._create_mock_grammar_evaluation()
+                raise ServiceExecutionError(
+                    service_name="Grammar Evaluation",
+                    details="Gemini API returned no text in response"
+                )
             
             response_text = response.text.strip()
             print(f"[DEBUG] Raw response text: {response_text[:200]}...")
@@ -135,11 +151,17 @@ class EvaluationService:
                 "coaching_advice": result.get("coaching_advice", "")
             }
             
+        except (ServiceUnavailableError, ServiceExecutionError):
+            # 커스텀 예외는 그대로 전파
+            raise
         except Exception as e:
             print(f"Grammar Evaluation Error: {str(e)}")
             import traceback
             traceback.print_exc()
-            return self._create_mock_grammar_evaluation()
+            raise ServiceExecutionError(
+                service_name="Grammar Evaluation",
+                details=str(e)
+            ) from e
     
     def _create_grammar_evaluation_prompt(
         self,
@@ -227,7 +249,10 @@ class EvaluationService:
             str: AI 캐릭터의 응답 대사
         """
         if self.model is None:
-            return "わかりました。詳しくお話を聞かせてください。"
+            raise ServiceUnavailableError(
+                service_name="AI Response Generation",
+                details="Gemini API key is not configured or model initialization failed"
+            )
         
         model = self.model
         
@@ -263,7 +288,10 @@ class EvaluationService:
             
             if not response.candidates or len(response.candidates) == 0:
                 print("Warning: No candidates in AI response")
-                return "わかりました。詳しくお話を聞かせてください。"
+                raise ServiceExecutionError(
+                    service_name="AI Response Generation",
+                    details="Gemini API returned no candidates"
+                )
             
             candidate = response.candidates[0]
             print(f"[DEBUG] AI Response finish_reason: {candidate.finish_reason}")
@@ -273,17 +301,32 @@ class EvaluationService:
                 finish_reason_name = candidate.finish_reason.name
                 if finish_reason_name not in ['STOP', 'MAX_TOKENS']:
                     print(f"Warning: AI response finish_reason={finish_reason_name}")
-                    return "わかりました。詳しくお話を聞かせてください。"
+                    raise ServiceExecutionError(
+                        service_name="AI Response Generation",
+                        details=f"Gemini API returned unexpected finish_reason: {finish_reason_name}"
+                    )
             elif candidate.finish_reason not in [1, 2]:
                 print(f"Warning: AI response finish_reason={candidate.finish_reason}")
-                return "わかりました。詳しくお話を聞かせてください。"
+                raise ServiceExecutionError(
+                    service_name="AI Response Generation",
+                    details=f"Gemini API returned unexpected finish_reason: {candidate.finish_reason}"
+                )
             
             if not hasattr(response, 'text') or not response.text:
                 print("Warning: No text in AI response")
-                return "わかりました。詳しくお話を聞かせてください。"
+                raise ServiceExecutionError(
+                    service_name="AI Response Generation",
+                    details="Gemini API returned no text in response"
+                )
             
             return response.text.strip()
             
+        except (ServiceUnavailableError, ServiceExecutionError):
+            # 커스텀 예외는 그대로 전파
+            raise
         except Exception as e:
             print(f"AI Response Generation Error: {str(e)}")
-            return "わかりました。詳しくお話を聞かせてください。"
+            raise ServiceExecutionError(
+                service_name="AI Response Generation",
+                details=str(e)
+            ) from e

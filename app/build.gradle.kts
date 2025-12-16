@@ -20,12 +20,21 @@ android {
     }
 
     buildTypes {
+        debug {
+            // 개발 환경: 에뮬레이터용 localhost 또는 실제 기기용 IP
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8000/api/\"")
+            // 실제 기기 테스트 시 아래 주석을 해제하고 IP를 변경하세요
+            // buildConfigField("String", "BASE_URL", "\"http://192.168.123.101:8000/api/\"")
+        }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true  // ProGuard 활성화
+            isShrinkResources = true  // 리소스 축소 활성화
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // 프로덕션 환경: 실제 API 서버 URL
+            buildConfigField("String", "BASE_URL", "\"https://api.jscenario.com/api/\"")
         }
     }
     compileOptions {
@@ -37,6 +46,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true  // BuildConfig 생성 활성화
     }
 }
 
@@ -84,6 +94,9 @@ dependencies {
     
     // Lottie Animation for Compose
     implementation("com.airbnb.android:lottie-compose:6.1.0")
+    
+    // Logging
+    implementation("com.jakewharton.timber:timber:5.0.1")
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -1,6 +1,6 @@
 package com.example.j_scenario.data.repository
 
-import android.util.Log
+import timber.log.Timber
 import com.example.j_scenario.data.api.JScenarioApiService
 import com.example.j_scenario.data.model.InteractionResponse
 import com.example.j_scenario.data.model.NetworkResult
@@ -38,6 +38,10 @@ class InteractionRepository(
     ): Flow<NetworkResult<InteractionResponse>> = flow {
         try {
             emit(NetworkResult.Loading)
+            
+            // 입력 검증
+            validateScenarioId(scenarioId)
+            validateAudioFile(audioFile)
             
             // 파일 크기 제한 확인 (10MB)
             val maxSize = 10 * 1024 * 1024
@@ -84,7 +88,7 @@ class InteractionRepository(
                 ))
             }
         } catch (e: Exception) {
-            Log.e(TAG, "processAudioInteraction error", e)
+            Timber.e(e, "processAudioInteraction error")
             emit(NetworkResult.Error(
                 e,
                 "네트워크 연결을 확인해주세요"
@@ -92,8 +96,48 @@ class InteractionRepository(
         }
     }.flowOn(Dispatchers.IO)
     
-    companion object {
-        private const val TAG = "InteractionRepository"
+    /**
+     * 시나리오 ID 검증
+     */
+    private fun validateScenarioId(scenarioId: String) {
+        if (scenarioId.isBlank()) {
+            throw IllegalArgumentException("시나리오 ID가 비어있습니다")
+        }
+        // 패턴: scenario_XXX 또는 scenario_XXX_Y
+        val pattern = Regex("^scenario_\\d{3}(_\\d+)?$")
+        if (!pattern.matches(scenarioId)) {
+            throw IllegalArgumentException("잘못된 시나리오 ID 형식입니다: $scenarioId")
+        }
+    }
+    
+    /**
+     * 오디오 파일 검증
+     */
+    private fun validateAudioFile(audioFile: File) {
+        if (!audioFile.exists()) {
+            throw IllegalArgumentException("오디오 파일이 존재하지 않습니다")
+        }
+        
+        if (!audioFile.isFile) {
+            throw IllegalArgumentException("파일이 아닙니다")
+        }
+        
+        // 파일 확장자 검증
+        val allowedExtensions = setOf(".wav", ".mp3", ".amr", ".m4a", ".ogg", ".flac")
+        val fileName = audioFile.name.lowercase()
+        val hasValidExtension = allowedExtensions.any { fileName.endsWith(it) }
+        
+        if (!hasValidExtension) {
+            throw IllegalArgumentException(
+                "지원하지 않는 파일 형식입니다. 지원 형식: ${allowedExtensions.joinToString(", ")}"
+            )
+        }
+        
+        // 최소 파일 크기 검증 (1KB)
+        val minSize = 1024
+        if (audioFile.length() < minSize) {
+            throw IllegalArgumentException("파일 크기가 너무 작습니다. 최소 크기: $minSize bytes")
+        }
     }
 }
 

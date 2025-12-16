@@ -9,6 +9,7 @@ import subprocess
 import tempfile
 from typing import Optional, Dict, Any
 from app.config import get_settings
+from app.utils.exceptions import ServiceUnavailableError, ServiceExecutionError
 
 settings = get_settings()
 
@@ -79,8 +80,10 @@ class AzurePronunciationService:
         self._ensure_sdk_initialized()
         
         if self.speech_sdk is None:
-            print("Warning: Azure Speech SDK not available, returning mock scores")
-            return self._create_mock_pronunciation_scores()
+            raise ServiceUnavailableError(
+                service_name="Azure Pronunciation Assessment",
+                details="Azure Speech SDK is not initialized. Please check AZURE_SPEECH_KEY and AZURE_SPEECH_REGION configuration."
+            )
         
         try:
             # 비동기 실행을 위해 스레드 풀 사용
@@ -95,11 +98,17 @@ class AzurePronunciationService:
             )
             return result
             
+        except ServiceUnavailableError:
+            # ServiceUnavailableError는 그대로 전파
+            raise
         except Exception as e:
             print(f"Azure Pronunciation Assessment Error: {str(e)}")
             import traceback
             traceback.print_exc()
-            return self._create_mock_pronunciation_scores()
+            raise ServiceExecutionError(
+                service_name="Azure Pronunciation Assessment",
+                details=str(e)
+            ) from e
     
     def _convert_audio_to_wav(self, audio_data: bytes, filename: str = "audio.amr") -> bytes:
         """
@@ -287,18 +296,29 @@ class AzurePronunciationService:
         
         elif result.reason == speechsdk.ResultReason.NoMatch:
             print("Azure: No speech could be recognized")
-            return self._create_mock_pronunciation_scores()
+            raise ServiceExecutionError(
+                service_name="Azure Pronunciation Assessment",
+                details="No speech could be recognized from the audio"
+            )
         
         elif result.reason == speechsdk.ResultReason.Canceled:
             cancellation = result.cancellation_details
             print(f"Azure: Speech recognition canceled: {cancellation.reason}")
+            error_details = f"Canceled: {cancellation.reason}"
             if cancellation.reason == speechsdk.CancellationReason.Error:
+                error_details += f", Error: {cancellation.error_details}"
                 print(f"  Error details: {cancellation.error_details}")
-            return self._create_mock_pronunciation_scores()
+            raise ServiceExecutionError(
+                service_name="Azure Pronunciation Assessment",
+                details=error_details
+            )
         
         else:
             print(f"Azure: Unexpected result reason: {result.reason}")
-            return self._create_mock_pronunciation_scores()
+            raise ServiceExecutionError(
+                service_name="Azure Pronunciation Assessment",
+                details=f"Unexpected result reason: {result.reason}"
+            )
     
     def _create_mock_pronunciation_scores(self) -> Dict[str, Any]:
         """

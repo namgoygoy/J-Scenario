@@ -6,6 +6,7 @@ import asyncio
 from typing import Optional
 from google.cloud import speech
 from app.config import get_settings
+from app.utils.exceptions import ServiceUnavailableError
 
 settings = get_settings()
 
@@ -62,11 +63,12 @@ class STTService:
         
         # 타입 체크: self.client가 None이 아님을 확인
         if self.client is None:
-            # API 키가 없으면 더미 응답 반환
-            print("Warning: STT client is None, returning dummy response")
-            print(f"  Credentials path: {self.credentials_path}")
-            print(f"  File exists: {os.path.exists(self.credentials_path) if self.credentials_path else False}")
-            return "財布をなくしました。どこにありますか。"
+            # API 키가 없으면 명확한 에러 발생
+            error_details = f"Credentials path: {self.credentials_path}, File exists: {os.path.exists(self.credentials_path) if self.credentials_path else False}"
+            raise ServiceUnavailableError(
+                service_name="STT",
+                details=error_details
+            )
         
         # 타입 가드를 위해 로컬 변수에 할당
         client = self.client
@@ -149,10 +151,17 @@ class STTService:
                     print(f"  Error: {response.error}")
                 return "音声を認識できませんでした。"
             
+        except ServiceUnavailableError:
+            # ServiceUnavailableError는 그대로 전파
+            raise
         except Exception as e:
             print(f"STT Error: {str(e)}")
             import traceback
             traceback.print_exc()
-            # 에러 발생 시 더미 응답 반환
-            return "財布をなくしました。どこにありますか。"
+            # 기타 예외는 ServiceExecutionError로 변환
+            from app.utils.exceptions import ServiceExecutionError
+            raise ServiceExecutionError(
+                service_name="STT",
+                details=str(e)
+            ) from e
 

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.j_scenario.JScenarioApplication
 import com.example.j_scenario.data.api.NetworkModule
 import com.example.j_scenario.data.model.NetworkResult
 import com.example.j_scenario.data.model.Scenario
@@ -20,9 +21,12 @@ import java.util.*
  * 
  * 홈 화면에서 일일 시나리오를 관리합니다.
  */
-class HomeViewModel(private val context: Context? = null) : ViewModel() {
+class HomeViewModel : ViewModel() {
     
     private val repository = ScenarioRepository(NetworkModule.apiService)
+    
+    // Application Context 사용 (메모리 누수 방지)
+    private val appContext: Context = JScenarioApplication.getInstance()
     
     // SharedPreferences 키
     private val PREFS_NAME = "j_scenario_prefs"
@@ -40,7 +44,7 @@ class HomeViewModel(private val context: Context? = null) : ViewModel() {
     private val DAILY_GOAL = 3
     
     // SharedPreferences 인스턴스
-    private val prefs: SharedPreferences? = context?.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     
     // 시나리오 로딩 상태
     private val _scenarioState = MutableStateFlow<NetworkResult<Scenario>>(NetworkResult.Loading)
@@ -80,12 +84,6 @@ class HomeViewModel(private val context: Context? = null) : ViewModel() {
      * 일일 진행도 로드 (SharedPreferences에서)
      */
     private fun loadDailyProgress() {
-        if (prefs == null) {
-            _dailyProgress.value = 0f
-            _completedScenariosToday.value = 0
-            return
-        }
-        
         val today = getTodayDateString()
         val lastDate = prefs.getString(KEY_LAST_DATE, "")
         
@@ -104,8 +102,6 @@ class HomeViewModel(private val context: Context? = null) : ViewModel() {
      * 일일 진행도 리셋 (새로운 날짜)
      */
     private fun resetDailyProgress() {
-        if (prefs == null) return
-        
         val today = getTodayDateString()
         prefs.edit()
             .putString(KEY_LAST_DATE, today)
@@ -122,7 +118,6 @@ class HomeViewModel(private val context: Context? = null) : ViewModel() {
      * @param score 시나리오 완료 점수 (0-100)
      */
     fun onScenarioCompleted(score: Int = 0) {
-        if (prefs == null) return
         
         val today = getTodayDateString()
         val lastDate = prefs.getString(KEY_LAST_DATE, "")
@@ -162,7 +157,6 @@ class HomeViewModel(private val context: Context? = null) : ViewModel() {
      * 사용자 통계 업데이트
      */
     private fun updateUserStats(score: Int) {
-        if (prefs == null) return
         
         val today = getTodayDateString()
         val yesterday = getYesterdayDateString()
@@ -222,11 +216,6 @@ class HomeViewModel(private val context: Context? = null) : ViewModel() {
      * 사용자 통계 로드
      */
     private fun loadUserStats() {
-        if (prefs == null) {
-            _userStats.value = UserStats()
-            return
-        }
-        
         val totalScenarios = prefs.getInt(KEY_TOTAL_SCENARIOS, 0)
         val totalScoreSum = prefs.getInt(KEY_TOTAL_SCORE_SUM, 0)
         val averageScore = if (totalScenarios > 0) totalScoreSum / totalScenarios else 0

@@ -4,7 +4,7 @@ import android.content.Context
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import android.util.Log
+import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -36,12 +36,12 @@ class AudioRecorder(private val context: Context) {
      */
     fun startRecording(): File? {
         if (isRecordingActive) {
-            Log.w(TAG, "Recording is already active")
+            Timber.w("Recording is already active")
             return outputFile
         }
         
         if (bufferSize == AudioRecord.ERROR || bufferSize == AudioRecord.ERROR_BAD_VALUE) {
-            Log.e(TAG, "Invalid buffer size")
+            Timber.e("Invalid buffer size")
             return null
         }
         
@@ -57,7 +57,7 @@ class AudioRecorder(private val context: Context) {
             )
             
             if (audioRecord?.state != AudioRecord.STATE_INITIALIZED) {
-                Log.e(TAG, "AudioRecord initialization failed")
+                Timber.e("AudioRecord initialization failed")
                 cleanupRecorder()
                 return null
             }
@@ -70,15 +70,15 @@ class AudioRecorder(private val context: Context) {
                 writeAudioDataToFile()
             }
             
-            Log.d(TAG, "Recording started (WAV 16kHz mono): ${outputFile?.absolutePath}")
+            Timber.d("Recording started (WAV 16kHz mono): ${outputFile?.absolutePath}")
             return outputFile
             
         } catch (e: SecurityException) {
-            Log.e(TAG, "Recording permission denied", e)
+            Timber.e(e, "Recording permission denied")
             cleanupRecorder()
             return null
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to start recording", e)
+            Timber.e(e, "Failed to start recording")
             cleanupRecorder()
             return null
         }
@@ -91,7 +91,7 @@ class AudioRecorder(private val context: Context) {
      */
     fun stopRecording(): File? {
         if (!isRecordingActive) {
-            Log.w(TAG, "No active recording to stop")
+            Timber.w("No active recording to stop")
             return null
         }
         
@@ -109,11 +109,11 @@ class AudioRecorder(private val context: Context) {
             recordingThread = null
             
             val file = outputFile
-            Log.d(TAG, "Recording stopped: ${file?.absolutePath}")
+            Timber.d("Recording stopped: ${file?.absolutePath}")
             file
             
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to stop recording", e)
+            Timber.e(e, "Failed to stop recording")
             cleanupRecorder()
             null
         }
@@ -138,9 +138,9 @@ class AudioRecorder(private val context: Context) {
             outputFile?.delete()
             outputFile = null
             
-            Log.d(TAG, "Recording cancelled")
+            Timber.d("Recording cancelled")
         } catch (e: Exception) {
-            Log.e(TAG, "Error cancelling recording", e)
+            Timber.e(e, "Error cancelling recording")
             cleanupRecorder()
         }
     }
@@ -149,6 +149,18 @@ class AudioRecorder(private val context: Context) {
      * Check if currently recording
      */
     fun isRecording(): Boolean = isRecordingActive
+    
+    /**
+     * 리소스 정리 및 종료
+     * ViewModel의 onCleared()에서 호출하거나 사용 후 반드시 호출해야 함
+     */
+    fun close() {
+        if (isRecordingActive) {
+            cancelRecording()
+        } else {
+            cleanupRecorder()
+        }
+    }
     
     /**
      * Create a temporary file for audio recording
@@ -175,10 +187,10 @@ class AudioRecorder(private val context: Context) {
                     if (read > 0) {
                         fos.write(buffer, 0, read)
                     } else if (read == AudioRecord.ERROR_INVALID_OPERATION) {
-                        Log.e(TAG, "Invalid operation during recording")
+                        Timber.e("Invalid operation during recording")
                         break
                     } else if (read == AudioRecord.ERROR_BAD_VALUE) {
-                        Log.e(TAG, "Bad value during recording")
+                        Timber.e("Bad value during recording")
                         break
                     }
                 }
@@ -191,7 +203,7 @@ class AudioRecorder(private val context: Context) {
             }
             
         } catch (e: IOException) {
-            Log.e(TAG, "Error writing audio data", e)
+            Timber.e(e, "Error writing audio data")
         } finally {
             tempFile.delete()
         }
@@ -211,7 +223,7 @@ class AudioRecorder(private val context: Context) {
             wavFile.writeBytes(wavData)
             
         } catch (e: IOException) {
-            Log.e(TAG, "Error converting PCM to WAV", e)
+            Timber.e(e, "Error converting PCM to WAV")
         }
     }
     
@@ -291,15 +303,11 @@ class AudioRecorder(private val context: Context) {
             recordingThread?.interrupt()
             recordingThread = null
         } catch (e: Exception) {
-            Log.e(TAG, "Error releasing AudioRecord", e)
+            Timber.e(e, "Error releasing AudioRecord")
         }
         audioRecord = null
         outputFile?.delete()
         outputFile = null
-    }
-    
-    companion object {
-        private const val TAG = "AudioRecorder"
     }
 }
 

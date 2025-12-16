@@ -20,6 +20,7 @@ from app.services.text_correction_service import TextCorrectionService
 from app.services.azure_pronunciation_service import AzurePronunciationService
 from app.services.evaluation_service import EvaluationService
 from app.services.tts_service import TTSService
+from app.utils.exceptions import ServiceError
 
 
 class InteractionService:
@@ -196,16 +197,22 @@ class InteractionService:
                 message="評価が完了しました"
             )
             
-        except Exception as e:
+        except ServiceError as e:
+            # 서비스 에러는 그대로 전파 (라우터에서 HTTP 에러로 변환)
             print(f"\n❌ [Pipeline Error] {str(e)}")
             import traceback
             traceback.print_exc()
-            # 에러 발생 시 더미 응답 반환
-            return self._create_fallback_response(
-                interaction_id,
-                scenario_id,
-                str(e)
-            )
+            raise
+        except Exception as e:
+            # 예상치 못한 에러는 ServiceExecutionError로 변환
+            print(f"\n❌ [Pipeline Error] {str(e)}")
+            import traceback
+            traceback.print_exc()
+            from app.utils.exceptions import ServiceExecutionError
+            raise ServiceExecutionError(
+                service_name="Interaction Pipeline",
+                details=str(e)
+            ) from e
     
     def _calculate_overall_score(
         self,

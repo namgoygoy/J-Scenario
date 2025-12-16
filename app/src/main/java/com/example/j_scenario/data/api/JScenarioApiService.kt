@@ -1,5 +1,6 @@
 package com.example.j_scenario.data.api
 
+import com.example.j_scenario.BuildConfig
 import com.example.j_scenario.data.model.InteractionResponse
 import com.example.j_scenario.data.model.ScenarioResponse
 import okhttp3.MultipartBody
@@ -51,19 +52,14 @@ interface JScenarioApiService {
         /**
          * 백엔드 서버 Base URL
          * 
-         * ⚠️ 중요: 에뮬레이터와 실제 기기 간 전환 시 이 값을 변경해야 합니다!
+         * BuildConfig를 통해 빌드 타입별로 자동 설정됩니다:
+         * - Debug: http://10.0.2.2:8000/api/ (에뮬레이터용)
+         * - Release: https://api.jscenario.com/api/ (프로덕션용)
          * 
-         * - 에뮬레이터 테스트: "http://10.0.2.2:8000/api/"
-         * - 실제 기기 테스트: "http://[컴퓨터의_IP_주소]:8000/api/"
-         * 
-         * 컴퓨터 IP 주소 확인 방법:
-         * - macOS/Linux: ifconfig | grep "inet " | grep -v 127.0.0.1
-         * - Windows: ipconfig (IPv4 주소 확인)
-         * 
-         * 현재 설정된 IP: 192.168.123.101 (실제 기기용)
-         * 에뮬레이터 사용 시: 10.0.2.2로 변경 필요
+         * 실제 기기에서 테스트할 경우:
+         * app/build.gradle.kts의 debug buildType에서 BASE_URL을 실제 IP로 변경하세요.
          */
-        const val BASE_URL = "http://192.168.123.101:8000/api/"
+        const val BASE_URL = BuildConfig.BASE_URL
     }
 }
 

@@ -54,9 +54,10 @@
 - **실감 나는 연출**: AI 생성 이미지와 캐릭터 음성으로 높은 몰입감 제공
 
 ### 음성 인식 및 AI 평가
-- **실시간 음성 녹음**: 마이크 버튼으로 간편하게 응답 녹음
+- **실시간 음성 녹음**: 마이크 버튼으로 간편하게 응답 녹음 (WAV 16kHz mono)
 - **다각적 평가**: 발음 정확도, 문법, 상황 적절성(TPO) 3가지 기준
 - **상세 피드백**: 점수와 함께 구체적인 개선 포인트 및 모범 답안 제공
+- **문맥 기반 보정**: STT 오류를 시나리오 문맥에 맞게 자동 보정
 
 ### AI 캐릭터 응답
 - **문맥 기반 응답**: 사용자의 발화 내용과 점수에 따른 자연스러운 AI 응답
@@ -65,7 +66,13 @@
 ### 게임화 요소
 - **경험치 시스템**: 시나리오 완료 시 점수에 따른 EXP 획득
 - **일일 진행도**: 하루 목표 달성을 위한 프로그레스 바
+- **연속 학습 일수**: 스트릭 시스템으로 학습 동기 부여
 - **시각적 피드백**: 점수 애니메이션, 80점 이상 시 축하 이펙트
+
+### 보안 및 안정성
+- **입력 검증**: 파일 타입, 크기, 시나리오 ID 패턴 검증
+- **보안 통신**: 개발 환경에서만 HTTP 허용, 프로덕션은 HTTPS만 허용
+- **에러 처리**: 통합 로깅 시스템 (Timber/loguru) 및 사용자 친화적 에러 메시지
 
 ---
 
@@ -83,7 +90,23 @@
 
 ## API Endpoints
 
-[여기에 API 명세서 첨부]
+### Scenarios
+- `GET /api/scenarios/random` - 랜덤 시나리오 조회
+- `GET /api/scenarios/{scenario_id}` - 특정 시나리오 조회
+
+### Interactions
+- `POST /api/interactions` - 사용자 발화 처리 및 평가
+  - 요청: `multipart/form-data`
+    - `scenario_id` (필수): 시나리오 ID (형식: `scenario_XXX` 또는 `scenario_XXX_Y`)
+    - `user_id` (선택): 사용자 ID
+    - `audio_file` (필수): 오디오 파일 (WAV, MP3, AMR 등, 최대 10MB)
+  - 응답: 평가 결과 및 AI 응답
+
+### Health Check
+- `GET /health` - 서버 상태 확인
+- `GET /` - API 정보
+
+**상세 API 문서**: 서버 실행 후 http://localhost:8000/docs 에서 확인 가능
 
 ---
 
@@ -102,8 +125,10 @@
 | Android Architecture | MVVM, Coroutines, Flow |
 | Android Networking | Retrofit2, Moshi |
 | Android Media | MediaRecorder, ExoPlayer |
+| Android Logging | Timber |
 | Animation | Lottie |
 | Backend | FastAPI |
+| Backend Logging | loguru |
 
 ### AI/ML Services
 | Category | Technology |
@@ -124,6 +149,8 @@
 |----------|------------|
 | Backend Server | Uvicorn (ASGI) |
 | API Documentation | Swagger UI, ReDoc |
+| Logging | Timber (Android), loguru (Backend) |
+| Input Validation | Pydantic Validators, Custom Validators |
 
 ---
 
@@ -136,8 +163,15 @@ JScenario/
 │       ├── java/com/example/j_scenario/
 │       │   ├── data/
 │       │   │   ├── api/                    # Retrofit API Service
+│       │   │   │   ├── JScenarioApiService.kt
+│       │   │   │   └── NetworkModule.kt
 │       │   │   ├── model/                  # Data Models
+│       │   │   │   ├── Interaction.kt
+│       │   │   │   ├── NetworkResult.kt
+│       │   │   │   └── Scenario.kt
 │       │   │   └── repository/             # Data Repositories
+│       │   │       ├── InteractionRepository.kt
+│       │   │       └── ScenarioRepository.kt
 │       │   ├── ui/
 │       │   │   ├── screens/                # Compose Screens
 │       │   │   │   ├── HomeScreen.kt
@@ -145,32 +179,60 @@ JScenario/
 │       │   │   │   ├── FeedbackScreen.kt
 │       │   │   │   └── LoadingScreen.kt
 │       │   │   ├── viewmodel/              # ViewModels
+│       │   │   │   ├── HomeViewModel.kt
+│       │   │   │   ├── ScenarioViewModel.kt
+│       │   │   │   └── FeedbackViewModel.kt
 │       │   │   ├── components/             # Reusable UI Components
+│       │   │   │   ├── AudioPlayer.kt
+│       │   │   │   ├── BottomNavigationBar.kt
+│       │   │   │   └── CustomProgressBar.kt
 │       │   │   └── theme/                  # App Theme
+│       │   │       ├── Color.kt
+│       │   │       ├── Theme.kt
+│       │   │       └── Type.kt
 │       │   ├── navigation/                 # Navigation Graph
+│       │   │   ├── NavGraph.kt
+│       │   │   └── Screen.kt
 │       │   ├── utils/                      # Utility Classes
+│       │   │   ├── AudioRecorder.kt
+│       │   │   ├── ScoreUtils.kt
+│       │   │   └── UrlUtils.kt
+│       │   ├── JScenarioApplication.kt     # Application Class
 │       │   └── MainActivity.kt
 │       └── res/                            # Resources
+│           ├── xml/
+│           │   ├── network_security_config.xml  # Network Security Config
+│           │   ├── backup_rules.xml
+│           │   └── data_extraction_rules.xml
+│           └── ...
 │
 ├── backend/                                # Python Backend
 │   ├── app/
 │   │   ├── main.py                         # FastAPI Entry Point
-│   │   ├── config.py                       # Configuration
+│   │   ├── config.py                       # Configuration & Validation
 │   │   ├── models/                         # Pydantic Models
+│   │   │   ├── interaction.py
+│   │   │   └── scenario.py
 │   │   ├── routes/                         # API Routes
 │   │   │   ├── scenarios.py
 │   │   │   └── interactions.py
-│   │   └── services/                       # Business Logic
-│   │       ├── interaction_service.py      # Main Pipeline
-│   │       ├── stt_service.py              # Google STT
-│   │       ├── text_correction_service.py  # Gemini Correction
-│   │       ├── azure_pronunciation_service.py
-│   │       ├── evaluation_service.py       # Gemini Evaluation
-│   │       └── tts_service.py              # Google TTS
+│   │   ├── services/                       # Business Logic
+│   │   │   ├── interaction_service.py      # Main Pipeline
+│   │   │   ├── stt_service.py              # Google STT
+│   │   │   ├── text_correction_service.py  # Gemini Correction
+│   │   │   ├── azure_pronunciation_service.py
+│   │   │   ├── evaluation_service.py       # Gemini Evaluation
+│   │   │   ├── tts_service.py              # Google TTS
+│   │   │   └── scenario_service.py
+│   │   └── utils/                          # Utility Functions
+│   │       ├── exceptions.py               # Custom Exceptions
+│   │       ├── logger.py                    # Logging Configuration
+│   │       └── validators.py                # Input Validation
 │   ├── data/
 │   │   └── scenarios.json                  # Scenario Data
 │   ├── uploads/                            # Audio & Image Files
 │   ├── requirements.txt
+│   ├── run.py
 │   └── README.md
 │
 └── cursor_rules/                           # Project Documentation
@@ -206,14 +268,18 @@ source venv/bin/activate  # macOS/Linux
 pip install -r requirements.txt
 
 # 4. 환경 변수 설정
-cp env.example.txt .env
-# .env 파일을 편집하여 API 키 입력:
-# - GEMINI_API_KEY
-# - GOOGLE_APPLICATION_CREDENTIALS
-# - AZURE_SPEECH_KEY
-# - AZURE_SPEECH_REGION
+# .env 파일이 이미 존재하는 경우 편집, 없으면 생성
+# 필수 환경 변수:
+# - GEMINI_API_KEY (필수)
+# - GOOGLE_APPLICATION_CREDENTIALS (STT/TTS용, 선택)
+# - AZURE_SPEECH_KEY (발음 평가용, 선택)
+# - AZURE_SPEECH_REGION (발음 평가용, 선택)
+#
+# 환경 변수 검증: 서버 시작 시 자동으로 필수 키 확인
 
 # 5. 서버 실행
+python run.py
+# 또는
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -226,11 +292,14 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 # 2. local.properties 설정 확인
 # sdk.dir=/path/to/your/Android/sdk
 
-# 3. NetworkModule.kt에서 BASE_URL 설정
-# private const val BASE_URL = "http://YOUR_SERVER_IP:8000/"
+# 3. BASE_URL 설정
+# app/build.gradle.kts의 buildTypes에서 BASE_URL 확인:
+# - Debug: http://10.0.2.2:8000/api/ (에뮬레이터용)
+# - 실제 기기 테스트 시 IP 주소 변경 필요
 
 # 4. Gradle Sync 실행
 # File > Sync Project with Gradle Files
+# (Timber 라이브러리 자동 다운로드)
 
 # 5. 앱 빌드 및 실행
 # Run > Run 'app' 또는 Shift + F10

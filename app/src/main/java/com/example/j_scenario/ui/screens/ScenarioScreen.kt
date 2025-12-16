@@ -92,6 +92,9 @@ fun ScenarioScreen(
             if (audioRecorder.isRecording()) {
                 audioRecorder.cancelRecording()
                 viewModel.cancelRecording()
+            } else {
+                // 녹음 중이 아니어도 리소스 정리
+                audioRecorder.close()
             }
         }
     }

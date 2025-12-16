@@ -29,6 +29,9 @@ python-jose[cryptography]>=3.3.0
 
 # Audio processing (ffmpeg required: brew install ffmpeg)
 
+# Logging
+loguru>=0.7.2
+
 # Testing
 pytest>=8.3.0
 pytest-asyncio>=0.24.0

@@ -1,6 +1,6 @@
 package com.example.j_scenario.data.repository
 
-import android.util.Log
+import timber.log.Timber
 import com.example.j_scenario.data.api.JScenarioApiService
 import com.example.j_scenario.data.model.NetworkResult
 import com.example.j_scenario.data.model.Scenario
@@ -46,7 +46,7 @@ class ScenarioRepository(
                 ))
             }
         } catch (e: Exception) {
-            Log.e(TAG, "getRandomScenario error", e)
+            Timber.e(e, "getRandomScenario error")
             emit(NetworkResult.Error(
                 e,
                 "네트워크 연결을 확인해주세요"
@@ -83,16 +83,12 @@ class ScenarioRepository(
                 ))
             }
         } catch (e: Exception) {
-            Log.e(TAG, "getScenarioById error", e)
+            Timber.e(e, "getScenarioById error")
             emit(NetworkResult.Error(
                 e,
                 "네트워크 연결을 확인해주세요"
             ))
         }
     }.flowOn(Dispatchers.IO)
-    
-    companion object {
-        private const val TAG = "ScenarioRepository"
-    }
 }
 
