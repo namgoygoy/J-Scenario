@@ -43,7 +43,7 @@
 
 **J-Scenario는 다릅니다.**
 
-[여기에 파이프라인 다이어그램 이미지 첨부]
+<img width="1307" height="231" alt="스크린샷 2025-12-17 오전 1 55 33" src="https://github.com/user-attachments/assets/d7819405-f281-4c9f-aa23-39a65597d91c" />
 
 이 파이프라인의 핵심은 **2단계 Gemini 문맥 보정**입니다:
 
