@@ -116,7 +116,7 @@
 - `GET /health` - 서버 상태 확인
 - `GET /` - API 정보
 
-**상세 API 문서**: 서버 실행 후 http://localhost:8000/docs 에서 확인 가능
+**상세 API 문서**: [EndPoint_회화.pdf](https://github.com/user-attachments/files/24195833/EndPoint_.pdf)
 
 ---
 ## 🔧 Stack
