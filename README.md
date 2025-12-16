@@ -78,13 +78,15 @@
 
 ## System Architecture
 
-[여기에 시스템 아키텍처 이미지 첨부]
+<img width="2816" height="1536" alt="Gemini_Generated_Image_a0p3dea0p3dea0p3" src="https://github.com/user-attachments/assets/a2abcea3-5f62-4bd2-9a55-e7d575e3db41" />
 
 ---
 
 ## Logic Flow (Sequence Diagram)
 
-[여기에 시퀀스 다이어그램 첨부]
+<div align="center">
+  <img width="871" height="575" alt="KakaoTalk_20251118_230927316" src="https://github.com/user-attachments/assets/29708c40-cf94-45cc-b947-0ca203d8f2e9" />
+</div>
 
 ---
 
@@ -311,8 +313,3 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 
----
-
-## License
-
-This project is licensed under the MIT License.
