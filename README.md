@@ -13,7 +13,10 @@
 
 ## Demo
 
-[여기에 데모 영상 첨부]
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/bde6b450-8998-432e-b75e-66f7f424162e" width="50%" />
+</div>
 
 ---
 
