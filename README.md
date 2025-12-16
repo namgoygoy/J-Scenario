@@ -7,6 +7,11 @@
 ![Google Cloud](https://img.shields.io/badge/Google%20Cloud-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)
 ![Azure](https://img.shields.io/badge/Azure%20Speech-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)
 
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/c011dd48-e6c7-4ef4-9356-800b227969d0" width="33%" />
+</div>
+
+
 > **살아남아라! 실전 일본어 서바이벌** — AI 기반 롤플레잉으로 실전 일본어 회화 능력을 극대화하는 학습 앱
 
 ---
