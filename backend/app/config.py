@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     google_application_credentials: str = ""
     google_cloud_project_id: str = ""
     
+    # Azure Cognitive Services (발음 평가)
+    azure_speech_key: str = ""
+    azure_speech_region: str = ""
+    
     # File Upload
     upload_dir: str = "./uploads"
     max_audio_size_mb: int = 10
@@ -49,4 +53,6 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Get cached settings instance"""
     return Settings()
+
+
 

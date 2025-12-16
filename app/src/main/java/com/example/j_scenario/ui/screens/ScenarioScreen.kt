@@ -245,7 +245,7 @@ fun ScenarioScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "🎧 내 녹음 확인",
+                            text = "내 녹음 확인",
                             fontSize = 16.sp,
                             color = PrimaryGreen,
                             fontWeight = FontWeight.Bold
@@ -292,7 +292,7 @@ fun ScenarioScreen(
                                 )
                             ) {
                                 Text(
-                                    text = "🔄 재녹음",
+                                    text = "재녹음",
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp
                                 )

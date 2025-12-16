@@ -57,7 +57,49 @@ data class Scenario(
     
     @Json(name = "expected_keywords")
     val expectedKeywords: List<String> = emptyList()
-)
+) {
+    /**
+     * 다음 챕터 ID 가져오기
+     * 
+     * 예: scenario_001_1 → scenario_001_2
+     *     scenario_001_3 → null (마지막 챕터)
+     *     scenario_002 → null (단일 챕터)
+     */
+    fun getNextChapterId(): String? {
+        // ID 패턴: scenario_XXX_Y (Y는 챕터 번호)
+        val regex = """(.+)_(\d+)$""".toRegex()
+        val matchResult = regex.find(id)
+        
+        return if (matchResult != null) {
+            val baseId = matchResult.groupValues[1]  // scenario_001
+            val currentChapter = matchResult.groupValues[2].toInt()  // 1
+            val nextChapter = currentChapter + 1
+            "${baseId}_${nextChapter}"  // scenario_001_2
+        } else {
+            // 단일 챕터 시나리오 (예: scenario_002)
+            null
+        }
+    }
+    
+    /**
+     * 챕터가 있는 시나리오인지 확인
+     */
+    fun isChapteredScenario(): Boolean {
+        return id.matches("""(.+)_(\d+)$""".toRegex())
+    }
+    
+    /**
+     * 현재 챕터 번호 가져오기
+     * 
+     * 예: scenario_001_1 → 1
+     *     scenario_002 → null
+     */
+    fun getCurrentChapter(): Int? {
+        val regex = """(.+)_(\d+)$""".toRegex()
+        val matchResult = regex.find(id)
+        return matchResult?.groupValues?.get(2)?.toInt()
+    }
+}
 
 /**
  * 시나리오 응답 모델

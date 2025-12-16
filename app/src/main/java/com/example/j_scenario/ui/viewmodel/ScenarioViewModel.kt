@@ -68,6 +68,9 @@ class ScenarioViewModel : ViewModel() {
                 .collect { result ->
                     if (result is NetworkResult.Success) {
                         _currentScenario.value = result.data
+                        // 새 시나리오 로드 시 이전 녹음 파일 초기화
+                        clearRecordedAudio()
+                        resetInteractionState()
                     }
                 }
         }
@@ -156,7 +159,44 @@ class ScenarioViewModel : ViewModel() {
      * 녹음된 오디오 파일 초기화
      */
     fun clearRecordedAudio() {
+        // 실제 파일이 있으면 삭제
+        _recordedAudioFile.value?.let { file ->
+            try {
+                if (file.exists()) {
+                    file.delete()
+                    android.util.Log.d("ScenarioViewModel", "Deleted recorded audio: ${file.name}")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("ScenarioViewModel", "Failed to delete audio file", e)
+            }
+        }
+        
+        // 녹음 상태 초기화
         _recordedAudioFile.value = null
+        _recordingDuration.value = 0
+        
+        // 녹음 중이었다면 타이머 중지
+        if (_isRecording.value) {
+            _isRecording.value = false
+            stopRecordingTimer()
+        }
+    }
+    
+    /**
+     * 다음 챕터 ID 가져오기
+     */
+    fun getNextChapterId(): String? {
+        return _currentScenario.value?.getNextChapterId()
+    }
+    
+    /**
+     * 다음 챕터 로드
+     */
+    fun loadNextChapter() {
+        val nextChapterId = getNextChapterId()
+        if (nextChapterId != null) {
+            loadScenario(nextChapterId)
+        }
     }
 }
 

@@ -1,5 +1,7 @@
 package com.example.j_scenario.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -22,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.example.j_scenario.ui.theme.JScenarioTheme
 import com.example.j_scenario.ui.theme.PrimaryGreen
 import com.example.j_scenario.ui.theme.ProgressBg
+import com.example.j_scenario.utils.ScoreUtils
 
 @Composable
 fun CustomProgressBar(
@@ -31,10 +34,27 @@ fun CustomProgressBar(
     trackColor: Color = ProgressBg,
     progressColor: Color = PrimaryGreen,
     indicatorSize: Dp = 12.dp,
-    indicatorInnerSize: Dp = 6.dp
+    indicatorInnerSize: Dp = 6.dp,
+    animated: Boolean = true,
+    score: Int? = null // 점수 기반 색상 사용 시 (0-100)
 ) {
     val density = LocalDensity.current
     var boxSize by remember { mutableStateOf(IntSize.Zero) }
+    
+    // 점수 기반 색상 결정
+    val finalProgressColor = score?.let { ScoreUtils.getScoreColor(it) } ?: progressColor
+    
+    // 애니메이션 적용 (animated가 true일 때만)
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress.coerceIn(0f, 1f),
+        animationSpec = if (animated) tween(
+            durationMillis = 1200,
+            delayMillis = 100
+        ) else tween(durationMillis = 0),
+        label = "progress_bar_animation"
+    )
+    
+    val displayProgress = if (animated) animatedProgress else progress.coerceIn(0f, 1f)
     
     Box(
         modifier = modifier
@@ -50,14 +70,14 @@ fun CustomProgressBar(
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .fillMaxWidth(progress.coerceIn(0f, 1f))
+                .fillMaxWidth(displayProgress)
                 .clip(RoundedCornerShape(10.dp))
-                .background(progressColor)
+                .background(finalProgressColor)
         )
         
         // Circular indicator at the end of progress
-        if (progress > 0f && boxSize.width > 0) {
-            val progressWidth = boxSize.width * progress.coerceIn(0f, 1f)
+        if (displayProgress > 0f && boxSize.width > 0) {
+            val progressWidth = boxSize.width * displayProgress
             val indicatorOffset = with(density) {
                 (progressWidth - indicatorSize.toPx() / 2).toDp()
             }
@@ -75,7 +95,7 @@ fun CustomProgressBar(
                     modifier = Modifier
                         .size(indicatorInnerSize)
                         .clip(CircleShape)
-                        .background(progressColor)
+                        .background(finalProgressColor)
                 )
             }
         }

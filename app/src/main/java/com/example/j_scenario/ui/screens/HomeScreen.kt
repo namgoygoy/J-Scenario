@@ -21,6 +21,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,7 +35,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.j_scenario.data.model.NetworkResult
 import com.example.j_scenario.data.model.Scenario
@@ -47,10 +48,12 @@ import com.example.j_scenario.utils.UrlUtils
 @Composable
 fun HomeScreen(
     onStartScenario: (Scenario) -> Unit,
-    viewModel: HomeViewModel = viewModel()
+    viewModel: HomeViewModel
 ) {
     val scenarioState by viewModel.scenarioState.collectAsState()
     val userStats by viewModel.userStats.collectAsState()
+    val dailyProgress by viewModel.dailyProgress.collectAsState()
+    val completedScenariosToday by viewModel.completedScenariosToday.collectAsState()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -84,7 +87,11 @@ fun HomeScreen(
                     .padding(16.dp)
             ) {
             // 일일 진행도
-            ProgressSection()
+            ProgressSection(
+                progress = dailyProgress,
+                completedCount = completedScenariosToday,
+                totalGoal = 3
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -134,17 +141,40 @@ fun HomeScreen(
 }
 
 @Composable
-fun ProgressSection() {
+fun ProgressSection(
+    progress: Float,
+    completedCount: Int,
+    totalGoal: Int
+) {
+    // 애니메이션 적용 (800ms duration)
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress.coerceIn(0f, 1f),
+        animationSpec = tween(durationMillis = 800),
+        label = "daily_progress_animation"
+    )
+    
     Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
         Text(
             text = "일일 진행도",
             fontSize = 12.sp,
             color = TextSecondary,
             letterSpacing = 0.5.sp
         )
+            Text(
+                text = "$completedCount / $totalGoal",
+                fontSize = 12.sp,
+                color = TextSecondary,
+                fontWeight = FontWeight.Medium
+            )
+        }
         Spacer(modifier = Modifier.height(8.dp))
         CustomProgressBar(
-            progress = 0.6f,
+            progress = animatedProgress,
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -332,7 +362,11 @@ fun StatBox(label: String, value: String, modifier: Modifier = Modifier) {
 fun ProgressSectionPreview() {
     JScenarioTheme {
         Column(modifier = Modifier.padding(16.dp)) {
-            ProgressSection()
+            ProgressSection(
+                progress = 0.66f,
+                completedCount = 2,
+                totalGoal = 3
+            )
         }
     }
 }

@@ -45,7 +45,10 @@ data class EvaluationResult(
     val correctedText: String? = null,
     
     @Json(name = "example_responses")
-    val exampleResponses: List<String> = emptyList()
+    val exampleResponses: List<String> = emptyList(),
+    
+    @Json(name = "coaching_advice")
+    val coachingAdvice: String = ""
 )
 
 /**

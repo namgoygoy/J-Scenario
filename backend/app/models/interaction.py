@@ -33,6 +33,7 @@ class EvaluationResult(BaseModel):
     transcription: str = Field(..., description="음성을 텍스트로 변환한 결과")
     corrected_text: Optional[str] = Field(None, description="교정된 텍스트")
     example_responses: list[str] = Field(default_factory=list, description="모범 답안 예시")
+    coaching_advice: str = Field(default="", description="한국어 코칭 조언")
 
 
 class InteractionRequest(BaseModel):
