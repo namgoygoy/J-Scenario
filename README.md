@@ -114,49 +114,21 @@
 **상세 API 문서**: 서버 실행 후 http://localhost:8000/docs 에서 확인 가능
 
 ---
+## 🔧 Stack
 
-## Stack
+### **Android (Client)**
+* **Core**: Kotlin, Jetpack Compose, MVVM
+* **Async**: Coroutines, Flow
+* **Network & Media**: Retrofit2, Moshi, ExoPlayer, MediaRecorder
 
-### Language
-| Category | Technology |
-|----------|------------|
-| Android | Kotlin |
-| Backend | Python 3.11+ |
+### **Backend (Server)**
+* **Core**: Python 3.11+, FastAPI, Uvicorn
+* **Data**: SQLite, Pydantic
+* **Docs**: Swagger UI, ReDoc
 
-### Framework & Library
-| Category | Technology |
-|----------|------------|
-| Android UI | Jetpack Compose |
-| Android Architecture | MVVM, Coroutines, Flow |
-| Android Networking | Retrofit2, Moshi |
-| Android Media | MediaRecorder, ExoPlayer |
-| Android Logging | Timber |
-| Animation | Lottie |
-| Backend | FastAPI |
-| Backend Logging | loguru |
-
-### AI/ML Services
-| Category | Technology |
-|----------|------------|
-| Speech-to-Text | Google Cloud Speech-to-Text |
-| Pronunciation Assessment | Azure Cognitive Services Speech |
-| LLM (Text Correction & Evaluation) | Google Gemini API |
-| Text-to-Speech | Google Cloud TTS |
-
-### Database & Storage
-| Category | Technology |
-|----------|------------|
-| Backend DB | SQLite (Development) |
-| File Storage | Local File System |
-
-### Infrastructure
-| Category | Technology |
-|----------|------------|
-| Backend Server | Uvicorn (ASGI) |
-| API Documentation | Swagger UI, ReDoc |
-| Logging | Timber (Android), loguru (Backend) |
-| Input Validation | Pydantic Validators, Custom Validators |
-
+### **AI Services**
+* **LLM**: Google Gemini API (Text Correction)
+* **Voice**: Google Cloud STT/TTS, Azure Cognitive Services (Pronunciation)
 ---
 
 ## Project Structure
@@ -273,14 +245,6 @@ source venv/bin/activate  # macOS/Linux
 pip install -r requirements.txt
 
 # 4. 환경 변수 설정
-# .env 파일이 이미 존재하는 경우 편집, 없으면 생성
-# 필수 환경 변수:
-# - GEMINI_API_KEY (필수)
-# - GOOGLE_APPLICATION_CREDENTIALS (STT/TTS용, 선택)
-# - AZURE_SPEECH_KEY (발음 평가용, 선택)
-# - AZURE_SPEECH_REGION (발음 평가용, 선택)
-#
-# 환경 변수 검증: 서버 시작 시 자동으로 필수 키 확인
 
 # 5. 서버 실행
 python run.py
@@ -295,7 +259,6 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 # File > Open > JScenario 폴더 선택
 
 # 2. local.properties 설정 확인
-# sdk.dir=/path/to/your/Android/sdk
 
 # 3. BASE_URL 설정
 # app/build.gradle.kts의 buildTypes에서 BASE_URL 확인:
@@ -307,7 +270,6 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 # (Timber 라이브러리 자동 다운로드)
 
 # 5. 앱 빌드 및 실행
-# Run > Run 'app' 또는 Shift + F10
 ```
 
 ### API Documentation
